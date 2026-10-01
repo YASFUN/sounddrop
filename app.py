@@ -6,11 +6,12 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'super-secret-key'
 
-# ЖЕСТКИЙ ФИКС ДЛЯ ОБЛАКА RENDER: принудительно создаем папку instance под базу данных
-INSTANCE_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'instance')
-os.makedirs(INSTANCE_DIR, exist_ok=True)
+# Автоматическое определение базы данных
+DATABASE_URL = os.environ.get('DATABASE_URL')
+if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{os.path.join(INSTANCE_DIR, "database.db")}'
+app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL or 'sqlite:///database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 
@@ -133,19 +134,18 @@ def edit_track(track_id):
         
     return redirect(url_for('index'))
 
-# 4. СТРАНИЦА ВХОДА (ИСПРАВЛЕНА БЕЗОПАСНАЯ ПРОВЕРКА)
+# 4. СТРАНИЦА ВХОДА
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
         
-        # Безопасный поиск: если юзера нет, Flask не упадет в ошибку 500
         user = User.query.filter_by(username=username).first()
         if user and user.password == password: 
             login_user(user)
             return redirect(url_for('index'))
-        return 'Неверный логин или пароль. Пожалуйста, сначала зарегистрируйтесь!'
+        return 'Неверный логин или пароль!'
     return render_template('login.html')
 
 # 5. СТРАНИЦА РЕГИСТРАЦИИ
@@ -159,7 +159,7 @@ def register():
             return 'Пожалуйста, заполните все поля формы!'
         
         if User.query.filter_by(username=username).first():
-            return 'Такой пользователь уже существует'
+            return 'Такой... пользователь уже существует'
             
         try:
             new_user = User(username=username, password=password)
@@ -180,6 +180,7 @@ def logout():
     return redirect(url_for('login'))
 
 if __name__ == '__main__':
+    # ЖЕСТКИЙ АВТО-ФИКС: базы данных создаются автоматически при старте
     with app.app_context():
         db.create_all()
     app.run(host='0.0.0.0', port=5000, debug=True)
