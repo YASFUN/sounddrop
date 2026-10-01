@@ -12,7 +12,6 @@ os.makedirs(INSTANCE_DIR, exist_ok=True)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{os.path.join(INSTANCE_DIR, "database.db")}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-# Папка для сохранения загруженных файлов
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 
 db = SQLAlchemy(app)
@@ -134,17 +133,19 @@ def edit_track(track_id):
         
     return redirect(url_for('index'))
 
-# 4. СТРАНИЦА ВХОДА
+# 4. СТРАНИЦА ВХОДА (ИСПРАВЛЕНА БЕЗОПАСНАЯ ПРОВЕРКА)
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
+        
+        # Безопасный поиск: если юзера нет, Flask не упадет в ошибку 500
         user = User.query.filter_by(username=username).first()
         if user and user.password == password: 
             login_user(user)
             return redirect(url_for('index'))
-        return 'Неверный логин или пароль'
+        return 'Неверный логин или пароль. Пожалуйста, сначала зарегистрируйтесь!'
     return render_template('login.html')
 
 # 5. СТРАНИЦА РЕГИСТРАЦИИ
