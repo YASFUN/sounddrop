@@ -5,7 +5,12 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'super-secret-key'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+
+# ЖЕСТКИЙ ФИКС ДЛЯ ОБЛАКА RENDER: принудительно создаем папку instance под базу данных
+INSTANCE_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'instance')
+os.makedirs(INSTANCE_DIR, exist_ok=True)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{os.path.join(INSTANCE_DIR, "database.db")}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # Папка для сохранения загруженных файлов
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
@@ -176,4 +181,4 @@ def logout():
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-    app.run(host='127.0.0.1', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
