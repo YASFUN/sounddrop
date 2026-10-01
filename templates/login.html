@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Вход в SoundDrop</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background: #0b0b12;
+            color: #fff;
+            padding: 50px;
+            text-align: center;
+        }
+
+        .form-box {
+            background: #161622;
+            padding: 30px;
+            display: inline-block;
+            border-radius: 12px;
+        }
+
+        input {
+            display: block;
+            margin: 10px auto;
+            padding: 10px;
+            width: 200px;
+            background: #222232;
+            border: 1px solid #33334c;
+            color: #fff;
+            border-radius: 6px;
+        }
+
+        button {
+            background: #00ffaa;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-box">
+        <h2>Вход в систему</h2>
+        <form method="POST">
+            <input type="text" name="username" placeholder="Логин" required>
+            <input type="password" name="password" placeholder="Пароль" required>
+            <button type="submit">Войти</button>
+        </form>
+        <p><a href="/register" style="color: #00ffaa;">Нет аккаунта? Зарегистрироваться</a></p>
+    </div>
+</body>
+</html>
